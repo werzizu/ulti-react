@@ -8,10 +8,37 @@ let initialItems = [
 function App() {
   return (
     <div className="app">
+      <DateSelect />
       <Logo />
       <Form />
       <PackingList />
       <Stats />
+    </div>
+  );
+}
+
+function DateSelect() {
+  const [step, setStep] = useState(0);
+  const [count, setCount] = useState(0);
+
+  return (
+    <div>
+      <input
+        type="range"
+        min="0"
+        max="10"
+        value={step}
+        onChange={(e) => setStep(Number(e.target.value))}
+      />
+      <span>step: {step}</span>
+
+      <button onClick={() => setCount((v) => v - step)}>-</button>
+      <input
+        type="text"
+        value={count}
+        onChange={(e) => setCount(Number(e.target.value))}
+      />
+      <button onClick={() => setCount((v) => v + step)}>+</button>
     </div>
   );
 }
