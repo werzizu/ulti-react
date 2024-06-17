@@ -1,17 +1,22 @@
 import { useState } from "react";
 import "./index.css";
-let initialItems = [
+let _initialItems = [
   { id: 1, description: "Passports", quantity: 2, packed: false },
   { id: 2, description: "Socks", quantity: 12, packed: false },
   { id: 3, description: "Charger", quantity: 3, packed: true },
 ];
 function App() {
+  const [initialItems, setInitialItems] = useState(_initialItems);
+
   return (
     <div className="app">
       <DateSelect />
       <Logo />
-      <Form />
-      <PackingList />
+      <Form initialItems={initialItems} setInitialItems={setInitialItems} />
+      <PackingList
+        initialItems={initialItems}
+        setInitialItems={setInitialItems}
+      />
       <Stats />
     </div>
   );
@@ -47,8 +52,8 @@ function Logo() {
   return <h1>FAR AWAY </h1>;
 }
 
-function Form() {
-  const [description, setDesctiption] = useState("");
+function Form({ initialItems, setInitialItems }) {
+  const [description, setDescription] = useState("");
   const [quantity, setQuantity] = useState(2);
   function handleSubmit(e) {
     e.preventDefault();
@@ -56,9 +61,9 @@ function Form() {
     if (!description) return;
 
     const newItem = { description, quantity, packed: false, id: Date.now() };
-    initialItems.push(newItem);
+    setInitialItems([...initialItems, newItem]);
     console.log(newItem);
-    setDesctiption("");
+    setDescription("");
     setQuantity(1);
   }
 
@@ -86,35 +91,46 @@ function Form() {
         value={description}
         onChange={(e) => {
           console.log(e.target);
-          setDesctiption(e.target.value);
+          setDescription(e.target.value);
         }}
       />
       <button>Add</button>
     </form>
   );
 }
-function PackingList() {
+
+function PackingList({ initialItems, setInitialItems }) {
   return (
     <div className="list">
       <ul>
         {initialItems.map((item) => (
-          <Item item={item} key={item.id} />
+          <Item item={item} key={item.id} setInitialItems={setInitialItems} />
         ))}
       </ul>
     </div>
   );
 }
 
-function Item({ item }) {
+function Item({ item, setInitialItems }) {
+  function markDoneInitialItem() {
+    setInitialItems((items) => [
+      ...items.map((_item) =>
+        _item.id === item.id ? { ...item, packed: true } : _item
+      ),
+    ]);
+  }
   return (
     <li>
       <span style={item.packed ? { textDecoration: "line-through" } : {}}>
         {item.quantity} {item.description}{" "}
       </span>
-      <button style={{ color: "red" }}>&times;</button>
+      <button onClick={markDoneInitialItem} style={{ color: "red" }}>
+        &times;
+      </button>
     </li>
   );
 }
+
 function Stats() {
   return (
     <footer className="stats">
