@@ -8,14 +8,23 @@ let _initialItems = [
 function App() {
   const [initialItems, setInitialItems] = useState(_initialItems);
 
+  function handleAddItems(newItem) {
+    setInitialItems([...initialItems, newItem]);
+  }
+
+  function handleDeleteItem(itemId) {
+    setInitialItems((items) => items.filter((_item) => _item.id !== itemId));
+  }
+
   return (
     <div className="app">
       <DateSelect />
       <Logo />
-      <Form initialItems={initialItems} setInitialItems={setInitialItems} />
+      <Form initialItems={initialItems} onAddItems={handleAddItems} />
       <PackingList
         initialItems={initialItems}
         setInitialItems={setInitialItems}
+        onDeleteItem={handleDeleteItem}
       />
       <Stats />
     </div>
@@ -52,7 +61,7 @@ function Logo() {
   return <h1>FAR AWAY </h1>;
 }
 
-function Form({ initialItems, setInitialItems }) {
+function Form({ initialItems, onAddItems }) {
   const [description, setDescription] = useState("");
   const [quantity, setQuantity] = useState(2);
   function handleSubmit(e) {
@@ -61,7 +70,7 @@ function Form({ initialItems, setInitialItems }) {
     if (!description) return;
 
     const newItem = { description, quantity, packed: false, id: Date.now() };
-    setInitialItems([...initialItems, newItem]);
+    onAddItems(newItem);
     console.log(newItem);
     setDescription("");
     setQuantity(1);
@@ -99,32 +108,43 @@ function Form({ initialItems, setInitialItems }) {
   );
 }
 
-function PackingList({ initialItems, setInitialItems }) {
+function PackingList({ initialItems, setInitialItems, onDeleteItem }) {
   return (
     <div className="list">
       <ul>
         {initialItems.map((item) => (
-          <Item item={item} key={item.id} setInitialItems={setInitialItems} />
+          <Item
+            item={item}
+            key={item.id}
+            onDeleteItem={onDeleteItem}
+            setInitialItems={setInitialItems}
+          />
         ))}
       </ul>
     </div>
   );
 }
 
-function Item({ item, setInitialItems }) {
+function Item({ item, setInitialItems, onDeleteItem }) {
   function markDoneInitialItem() {
     setInitialItems((items) => [
       ...items.map((_item) =>
-        _item.id === item.id ? { ...item, packed: true } : _item
+        _item.id === item.id ? { ...item, packed: !item.packed } : _item
       ),
     ]);
   }
   return (
     <li>
+      <input
+        type="checkbox"
+        onClick={markDoneInitialItem}
+        checked={item.packed}
+        onChange={() => {}}
+      />
       <span style={item.packed ? { textDecoration: "line-through" } : {}}>
-        {item.quantity} {item.description}{" "}
+        {"" + item.packed} {item.quantity} {item.description}{" "}
       </span>
-      <button onClick={markDoneInitialItem} style={{ color: "red" }}>
+      <button onClick={() => onDeleteItem(item.id)} style={{ color: "red" }}>
         &times;
       </button>
     </li>
